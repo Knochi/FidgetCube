@@ -8,30 +8,32 @@ color("red") smoothRing(3.75,5);
 }
 
 module smoothRing(holeRad,bevelRad=2,thick=1,fudge=0.1){
+    
 //r²=(t-r)²+b²
 b = sqrt(pow(bevelRad,2)-pow(bevelRad-thick,2));
 echo(b);
     
-//r²=(b/2)²+h²
-echo(b);
-h = sqrt(pow(bevelRad,2)-pow(b/2,2));
-echo(h);
-s = h-b/2;    
-echo(s);
 
 
-
-    
-rotate_extrude(){
-translate([-b-holeRad,0,0])
-    union(){
-        intersection(){
-            square([b,1]);
-            translate([0,-bevelRad+thick,0]) 
-                circle(r=bevelRad);
-        }
-    translate([-fudge,0,0]) square([fudge,thick]);
+union(){
+    rotate_extrude(){
+        translate([-b-holeRad,0,0])
+            union(){
+                intersection(){
+                    square([b,1]);
+                    translate([0,-bevelRad+thick,0]) 
+                        circle(r=bevelRad);
+                }
+                translate([-fudge,0,0]) 
+                    square([fudge,thick]);
+            }
     }
+    difference(){
+        children();
+        translate([0,0,thick/2]) 
+            cylinder(h=thick+fudge,r=holeRad+b,center=true);
+    }
+
 }
 }
 module trackBall()

@@ -1,5 +1,7 @@
 $fn=100;
 
+use <FidgetCubeParts.scad>
+
 cubeSize=1.3*25.4; //original is 1.3" --> in mm
 echo(cubeSize/2);
 cubeBevel=5;
@@ -10,9 +12,8 @@ faceBevel=cubeBevel*0.8;
 faceThick=1;
 
 fudge=0.1;
-
-
-
+translate([0,0,30])
+smoothRing(3.75) translate([0,0,0.5]) face();
 difference(){
     minkowski(){
         cube(cubeSize-cubeBevel,true);
@@ -31,14 +32,14 @@ difference(){
     //cube(7,true);
 }
 
-module face()
+module face(thick=1)
 {
     extrHeight=cubeSize/2-faceThick*2;
     
     //union(){
         minkowski(){
             cube([faceSize-faceBevel,faceSize-faceBevel,faceThick/2],true);
-            cylinder(h=faceThick/2+fudge,d=faceBevel,center=true);
+            cylinder(h=faceThick/2,d=faceBevel,center=true);
         }
         *translate([0,0,(-extrHeight-faceThick)/2]) rotate([180,0,0])
             linear_extrude(height=extrHeight,center=true,scale=0.06) 
