@@ -1,6 +1,6 @@
 $fn=100;
 trackBall();
-!joyStick();
+joyStick();
 
 minkowski(){
     cube(45,center=true);
@@ -28,7 +28,7 @@ module trackBall()
 //PSP1000 like Joystick (19x19x9mm)
 module joyStick()
 {
-    translate import("nub_base.stl");
+    import("nub_base.stl");
     /*cylinder(h=2,d=11.3,center=true);
     cylinder(h=2,d=14.15,center=true);
     cylinder(h=2,d=18.1,center=true);
