@@ -14,12 +14,16 @@ faceThick=1;
 fudge=0.1;
 translate([0,0,30]){
     smoothRing(3.75) translate([0,0,0.5]) face();
-    translate([0,0,-5])trackBall();
+    translate([0,0,-3])trackBall();
+    translate([0,0,-9]) tactMini();
 }
 
+
 rotate([0,90,0]) translate([0,0,30]){
-    rocker();
+    rockerSmall();
 }
+
+
 
 difference(){
     minkowski(){
