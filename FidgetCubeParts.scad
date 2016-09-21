@@ -1,11 +1,12 @@
 $fn=100;
-trackBall();
-joyStick();
+translate([0,40,0]){
+    trackBall();
 translate([0,0,10]) color("red") smoothRing(3.75,5);
+}
 translate([-40,0,0]) rocker();
 translate([-70,0,0]) rockerSmall();
 translate([-90,0,0]) tactMini();
-
+pushPenMecha();
 
 
 *minkowski(){
@@ -105,3 +106,12 @@ module tactMini()
     translate([0,0,0.9/2]) cylinder(h=0.9,d=2.9,center=true);
 }
 
+module pushPenMecha()
+{
+    innerDia=2*2.54;
+    outerDia=2*5.461;
+    insideLen=2*19.05;
+    cylinder(h=insideLen,d=innerDia,center=true);
+    linear_extrude(height=9,center=false,convexity=10,twist=90,slices=100)
+        #translate([outerDia/2,0,0]) square([outerDia-innerDia,1],true);
+}

@@ -1,5 +1,5 @@
 $fn=100;
-
+use <MCAD.scad>
 use <FidgetCubeParts.scad>
 
 cubeSize=1.3*25.4; //original is 1.3" --> in mm
