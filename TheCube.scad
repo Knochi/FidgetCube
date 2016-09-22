@@ -23,6 +23,14 @@ rotate([0,90,0]) translate([0,0,30]){
     rockerSmall();
 }
 
+rotate([0,-90,0]) translate([0,0,30]){
+    joyStick();
+    translate([0,0,+5])
+    difference(){
+        face();
+        cylinder(h=1+fudge,d=18.2+fudge,center=true);
+    }
+}
 
 
 difference(){

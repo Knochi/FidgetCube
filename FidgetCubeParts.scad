@@ -7,6 +7,7 @@ translate([-40,0,0]) rocker();
 translate([-70,0,0]) rockerSmall();
 translate([-90,0,0]) tactMini();
 pushPenMecha();
+translate([40,0,0]) joyStick();
 
 
 *minkowski(){
@@ -67,11 +68,33 @@ module trackBall()
 //PSP1000 like Joystick (19x19x9mm)
 module joyStick()
 {
-    import("nub_base.stl");
-    /*cylinder(h=2,d=11.3,center=true);
-    cylinder(h=2,d=14.15,center=true);
-    cylinder(h=2,d=18.1,center=true);
-    */
+    fudge=0.1;
+    union(){
+        translate([0,0,-2.2])
+            intersection(){ //body
+                cube([18.6,18.6,4.4],true);
+                rotate([0,0,45]) cube([20.7,20.7,4.4],true);
+            }
+        translate([0,0,0.5-fudge/2]) cylinder(h=1+fudge,d=18.2,center=true); //cylinder
+        difference(){ //left flange
+            translate([-18.6/2+1,(18.6-3.4)/2,-1.8-0.9/2]) cube([8,3.4,0.9],true);
+            translate([-(19.5+0.9)/2,(18.6-3.4)/2,-1.8-0.9/2]) cylinder(h=0.9+fudge,d=1.9,center=true);
+        }
+        translate([18.6/2,18/2,-1.8-0.9/2]) 
+            rotate([0,0,45])
+                difference(){ //right flange
+                    union(){
+                        translate([-6/2,0,0]) cube([6,4.1,0.9],true);
+                        cylinder(h=0.9,d=4.1,center=true);
+                    }
+                    cylinder(h=0.9+fudge,d=1.9,center=true); //drill
+                }
+        translate([0,0,2.5])
+            union(){ //TheKnob
+                cylinder(h=1,d=11);
+                translate([0,0,-2.5-fudge/2]) cylinder(h=2.5+fudge,d=4.9);
+            }
+    }    
 }
 
 //Marquardt 1838.7203
@@ -115,3 +138,4 @@ module pushPenMecha()
     linear_extrude(height=9,center=false,convexity=10,twist=90,slices=100)
         #translate([outerDia/2,0,0]) square([outerDia-innerDia,1],true);
 }
+
