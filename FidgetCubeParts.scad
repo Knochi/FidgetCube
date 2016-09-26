@@ -6,8 +6,11 @@ translate([0,0,10]) color("red") smoothRing(3.75,5);
 translate([-40,0,0]) rocker();
 translate([-70,0,0]) rockerSmall();
 translate([-90,0,0]) tactMini();
-pushPenMecha();
+!pushPenMecha();
 translate([40,0,0]) joyStick();
+translate([0,-40,0]) screw15();
+
+ 
 
 
 *minkowski(){
@@ -34,6 +37,7 @@ module smoothRing(holeRad,bevelRad=2,thick=1,fudge=0.1)
                         square([fudge,thick]);
                 }
         }
+        if ($children) 
         difference(){
             children();
             translate([0,0,thick/2]) 
@@ -131,11 +135,95 @@ module tactMini()
 
 module pushPenMecha()
 {
+    fudge=0.1;
+    //dimensions lent from mega pen instructable
     innerDia=2*2.54;
     outerDia=2*5.461;
     insideLen=2*19.05;
-    cylinder(h=insideLen,d=innerDia,center=true);
-    linear_extrude(height=9,center=false,convexity=10,twist=90,slices=100)
-        #translate([outerDia/2,0,0]) square([outerDia-innerDia,1],true);
+    camHgh=9;
+    nudgeWdh=2*1.27;
+    
+    cylinder(h=insideLen,d=innerDia); //shaft
+    
+    difference(){
+        union(){
+        for(i=[0:90:360]){ // four cams
+        translate ([0,0,insideLen-1-camHgh]) rotate([0,0,i])
+            difference(){
+                linear_extrude(height=camHgh,center=false,convexity=10,twist=90,slices=100)
+                //#translate([outerDia/2,0,0]) square([outerDia-innerDia,1],true);
+                intersection(){
+                    circle(d=outerDia);
+                    square(outerDia/2+fudge);
+                }   
+                translate([0,0,-fudge/2]) rotate([0,0,-90]) cube([outerDia/2+fudge,outerDia/2+fudge,camHgh+fudge]);    
+            }
+        }
+        cylinder(h=insideLen-camHgh-1,d=outerDia);//body
+        }
+        translate([0,0,(insideLen-fudge)/2]) cube([outerDia+fudge,nudgeWdh,insideLen],true);
+    
+    }
+    translate([0,0,insideLen+15]) rotate([0,180,0])
+    union(){
+        difference(){
+            camerator2(camHgh*2,outerDia);
+            translate([0,0,camHgh]) cylinder(h=insideLen/4,d=innerDia+fudge);
+        }
+        cylinder(h=insideLen/4,d=innerDia+fudge);
+}
+    
+}
+module screw15()
+{
+    fudge=0.1;
+    
+    %translate([0,0,-5]) cylinder(h=5,d=1.5);//bolt
+    %difference(){
+        translate() cylinder(h=1.1,d=2.5);//head
+        translate([0,0,0.35]) torx();
+    }
+    if ($children)
+        difference(){
+            children();
+            cylinder(h=1.5,d=2.6); //cutout for head
+            translate([0,0,-6]) cylinder(h=6,d=1);
+        }
 }
 
+module torx()
+{
+    T=5;
+    A=0.75;
+    B=0.72*A; 
+    re= 0.1*A*2;
+    ri= 0.175*A*2;
+    fudge=0.1;
+    
+difference(){
+    cylinder(h=0.8,r=A);
+    for(i=[0:60:360])
+        rotate([0,0,i])translate([-B-ri,0,-fudge/2]) cylinder(h=0.8+fudge,r=ri);
+        //intersection_for(n=[30:60:360])
+            //  rotate([0,0,n]) translate([-A+re,0,0]) circle(re);
+        }
+              
+}
+
+module camerator2(camHgh, outerDia){
+    fudge=0.1;
+    
+     for(i=[0:180:360]){ // four cams
+        rotate([0,0,i])
+            difference(){
+                linear_extrude(height=camHgh,center=false,convexity=10,twist=180,slices=50)
+                //#translate([outerDia/2,0,0]) square([outerDia-innerDia,1],true);
+        
+                intersection(){ //quarter circle
+                    circle(d=outerDia);
+                    translate([-(outerDia+fudge)/2,0,0]) square(outerDia+fudge);
+                }   
+                translate([-(outerDia+fudge)/2,0,-fudge/2]) rotate([0,0,-90]) cube([outerDia/2,outerDia+fudge,camHgh+fudge]);    
+            }
+        }
+}

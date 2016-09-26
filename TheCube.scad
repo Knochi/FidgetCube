@@ -1,5 +1,5 @@
 $fn=100;
-use <MCAD.scad>
+
 use <FidgetCubeParts.scad>
 
 cubeSize=1.3*25.4; //original is 1.3" --> in mm
@@ -12,17 +12,25 @@ faceBevel=cubeBevel*0.8;
 faceThick=1;
 
 fudge=0.1;
+
+// Top
 translate([0,0,30]){
-    smoothRing(3.75) translate([0,0,0.5]) face();
+    translate([ -10.61, -10.39, 0 ])
+        screw15()
+    translate([ 10.61, 10.39, -0.2 ])
+            smoothRing(3.75) 
+                translate([0,0,0.5]) face();
     translate([0,0,-3])trackBall();
     translate([0,0,-9]) tactMini();
+    
 }
 
-
+// right
 rotate([0,90,0]) translate([0,0,30]){
     rockerSmall();
 }
 
+// left
 rotate([0,-90,0]) translate([0,0,30]){
     joyStick();
     translate([0,0,+5])
