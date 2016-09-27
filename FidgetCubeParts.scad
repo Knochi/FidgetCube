@@ -1,16 +1,15 @@
 $fn=100;
 translate([0,40,0]){
-    trackBall();
+    trackBall(0.1);
 translate([0,0,10]) color("red") smoothRing(3.75,5);
 }
 translate([-40,0,0]) rocker();
 translate([-70,0,0]) rockerSmall();
 translate([-90,0,0]) tactMini();
-!pushPenMecha();
-translate([40,0,0]) joyStick();
+*pushPenMecha(); //this costs a lot of computing power!
+translate([40,0,0]) joyStick(0.1);
 translate([0,-40,0]) screw15();
 
- 
 
 
 *minkowski(){
@@ -47,8 +46,12 @@ module smoothRing(holeRad,bevelRad=2,thick=1,fudge=0.1)
     }
 }
 
+module worryStone()
+{
+        scale([1,0.6,0.15]) sphere(12);
+}
 
-module trackBall()
+module trackBall(stencilFudge=0)
 {
     fudge=0.1;
     
@@ -58,33 +61,61 @@ module trackBall()
             polygon([[0,0],[3.75,0],[3.25,1],[0,1]]);
     difference(){
     union(){
-        translate([0,0,-3.7/2]) cube([9,9,3.7],true);
+        translate([0,0,-3.7/2]) cube([9+stencilFudge,9+stencilFudge,3.7+stencilFudge],true); //body
+        
         //standoffs
-        translate([-5+fudge/2,1.6,-1.5]) cube([1+fudge,1,1],true);
-        translate([-5+fudge/2,-1.6,-1.5]) cube([1+fudge,1,1],true);
-        translate([5+fudge/2,1.6,-1.5]) cube([1+fudge,1,1],true);
-        translate([5+fudge/2,-1.6,-1.5]) cube([1+fudge,1,1],true);
+        if (stencilFudge) {
+            translate([-5+fudge/2,1.6,-1]) cube([1+fudge+stencilFudge,1+stencilFudge,2+stencilFudge],true);
+            translate([-5+fudge/2,-1.6,-1]) cube([1+fudge+stencilFudge,1+stencilFudge,2+stencilFudge],true);
+            translate([5+fudge/2,1.6,-1]) cube([1+fudge+stencilFudge,1+stencilFudge,2+stencilFudge],true);
+            translate([5+fudge/2,-1.6,-1]) cube([1+fudge+stencilFudge,1+stencilFudge,2+stencilFudge],true);
+        }
+        else {
+            translate([-5+fudge/2,1.6,-1.5]) cube([1+fudge,1,1],true);
+            translate([-5+fudge/2,-1.6,-1.5]) cube([1+fudge,1,1],true);
+            translate([5+fudge/2,1.6,-1.5]) cube([1+fudge,1,1],true);
+            translate([5+fudge/2,-1.6,-1.5]) cube([1+fudge,1,1],true);
+        }
     }
     translate([0,0,-3.7+0.5/2-fudge]) cube([6.9,6.9,0.5+fudge],true);
 }
 }
 
 //PSP1000 like Joystick (19x19x9mm)
-module joyStick()
+module joyStick(stencilFudge=0)
 {
     fudge=0.1;
+    
     union(){
         translate([0,0,-2.2])
             intersection(){ //body
-                cube([18.6,18.6,4.4],true);
-                rotate([0,0,45]) cube([20.7,20.7,4.4],true);
+                cube([18.6+stencilFudge,18.6+stencilFudge,4.4],true);
+                rotate([0,0,45]) cube([20.7+stencilFudge,20.7+stencilFudge,4.4],true);
             }
-        translate([0,0,0.5-fudge/2]) cylinder(h=1+fudge,d=18.2,center=true); //cylinder
+        translate([0,0,0.5-fudge/2]) cylinder(h=1+fudge,d=18.2,center=true); //cylinder plate
+        
+        if (stencilFudge){
+            
+            difference(){ //left flange
+                translate([-18.6/2+1,(18.6-3.4)/2,-(1.8+0.9)/2]) cube([8+stencilFudge,3.4+stencilFudge,0.9+1.8],true);
+                translate([-(19.5+0.9)/2,(18.6-3.4)/2,-(1.8+0.9)/2]) cylinder(h=0.9+1.8+fudge,d=1.9-stencilFudge,center=true);
+            }
+             translate([18.6/2,18/2,-(1.8+0.9)/2]) 
+            rotate([0,0,45])
+                difference(){ //right flange
+                    union(){
+                        translate([-6/2,0,0]) cube([6+stencilFudge,4.1+stencilFudge,1.8+0.9],true);
+                        cylinder(h=1.8+0.9,d=4.1+stencilFudge,center=true);
+                    }
+                    cylinder(h=1.8+0.9+fudge,d=1.9-stencilFudge,center=true); //drill
+                }
+        }
+        else    {
         difference(){ //left flange
             translate([-18.6/2+1,(18.6-3.4)/2,-1.8-0.9/2]) cube([8,3.4,0.9],true);
             translate([-(19.5+0.9)/2,(18.6-3.4)/2,-1.8-0.9/2]) cylinder(h=0.9+fudge,d=1.9,center=true);
         }
-        translate([18.6/2,18/2,-1.8-0.9/2]) 
+         translate([18.6/2,18/2,-1.8-0.9/2]) 
             rotate([0,0,45])
                 difference(){ //right flange
                     union(){
@@ -93,6 +124,9 @@ module joyStick()
                     }
                     cylinder(h=0.9+fudge,d=1.9,center=true); //drill
                 }
+    }
+    
+       
         translate([0,0,2.5])
             union(){ //TheKnob
                 cylinder(h=1,d=11);
