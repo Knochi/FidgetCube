@@ -6,7 +6,7 @@ translate([0,0,10]) color("red") smoothRing(3.75,5);
 translate([-40,0,0]) rocker();
 translate([-70,0,0]) rockerSmall();
 translate([-90,0,0]) tactMini();
-*pushPenMecha(); //this costs a lot of computing power!
+pushPenMecha(); //this costs a lot of computing power!
 translate([40,0,0]) joyStick(0.1);
 translate([0,-40,0]) screw15();
 
@@ -169,43 +169,69 @@ module tactMini()
 
 module pushPenMecha()
 {
+    
+    //dimensions lent from mega pen instructable (scaled to 20%)
+    
+    //common
+    innerDia=0.2*25.4;
+    outerDia=0.2*54.61;
+    nudgeWdh=0.2*12.7;
     fudge=0.1;
-    //dimensions lent from mega pen instructable
-    innerDia=2*2.54;
-    outerDia=2*5.461;
-    insideLen=2*19.05;
-    camHgh=9;
-    nudgeWdh=2*1.27;
+    
+    //inside (the inner part)
+    insideLen=0.2*190.5;
+    insideCamHgh=9;
+    
+    //pusher (the pusher knob)
+    pusherLen=0.2*228.6;
+    pusherCamHgh=0.2*85.781; echo("pCamh", pusherCamHgh);
+    pusherDrillHgh=0.2*38.1;
+    pusherNudgeAng=60; //60°
+    
     
     cylinder(h=insideLen,d=innerDia); //shaft
     
     difference(){
         union(){
         for(i=[0:90:360]){ // four cams
-        translate ([0,0,insideLen-1-camHgh]) rotate([0,0,i])
+        translate ([0,0,insideLen-1-insideCamHgh]) rotate([0,0,i])
             difference(){
-                linear_extrude(height=camHgh,center=false,convexity=10,twist=90,slices=100)
+                linear_extrude(height=insideCamHgh,center=false,convexity=10,twist=90,slices=100)
                 //#translate([outerDia/2,0,0]) square([outerDia-innerDia,1],true);
                 intersection(){
                     circle(d=outerDia);
                     square(outerDia/2+fudge);
                 }   
-                translate([0,0,-fudge/2]) rotate([0,0,-90]) cube([outerDia/2+fudge,outerDia/2+fudge,camHgh+fudge]);    
+                translate([0,0,-fudge/2]) rotate([0,0,-90]) cube([outerDia/2+fudge,outerDia/2+fudge,insideCamHgh+fudge]);    
             }
         }
-        cylinder(h=insideLen-camHgh-1,d=outerDia);//body
+        cylinder(h=insideLen-insideCamHgh-1,d=outerDia);//body
         }
         translate([0,0,(insideLen-fudge)/2]) cube([outerDia+fudge,nudgeWdh,insideLen],true);
     
     }
-    translate([0,0,insideLen+15]) rotate([0,180,0])
-    union(){
-        difference(){
-            camerator2(camHgh*2,outerDia);
-            translate([0,0,camHgh]) cylinder(h=insideLen/4,d=innerDia+fudge);
+    
+    //pusher
+    color("red") translate([0,0,insideLen+pusherLen+fudge]) rotate([0,180,90])
+        !union(){
+            //cam Part
+            translate([0,0,pusherLen-pusherCamHgh]){
+                difference(){
+                    camerator2(pusherCamHgh,outerDia);
+                    translate([0,0,pusherCamHgh-pusherDrillHgh]) cylinder(h=pusherDrillHgh,d=innerDia+fudge);
+                }
+                cylinder(h=pusherCamHgh-pusherDrillHgh,d=innerDia+fudge); //the Drill
+            }
+            //body
+            cylinder(h=pusherLen-pusherCamHgh,d=outerDia);
         }
-        cylinder(h=insideLen/4,d=innerDia+fudge);
-}
+        
+    //shell
+    translate() 
+        %difference() {
+            cylinder(h=pusherLen+insideLen,d=outerDia+2);
+            translate([0,0,-fudge/2]) cylinder(h=pusherLen+insideLen+fudge,d=outerDia+fudge);
+        }
     
 }
 module screw15()
@@ -247,16 +273,17 @@ difference(){
 module camerator2(camHgh, outerDia){
     fudge=0.1;
     
-     for(i=[0:180:360]){ // four cams
+     for(i=[0:180:360]){ // two cams
         rotate([0,0,i])
             difference(){
-                linear_extrude(height=camHgh,center=false,convexity=10,twist=180,slices=50)
+                linear_extrude(height=camHgh,center=false,convexity=10,twist=180,$fn=400)
                 //#translate([outerDia/2,0,0]) square([outerDia-innerDia,1],true);
         
-                intersection(){ //quarter circle
+                intersection(){ //half circle
                     circle(d=outerDia);
-                    translate([-(outerDia+fudge)/2,0,0]) square(outerDia+fudge);
+                    translate([-(outerDia)/2,0,0]) square(outerDia);
                 }   
+                
                 translate([-(outerDia+fudge)/2,0,-fudge/2]) rotate([0,0,-90]) cube([outerDia/2,outerDia+fudge,camHgh+fudge]);    
             }
         }
