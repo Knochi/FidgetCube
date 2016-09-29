@@ -176,17 +176,21 @@ module pushPenMecha()
     innerDia=0.2*25.4;
     outerDia=0.2*54.61;
     nudgeWdh=0.2*12.7;
+    nudgeDpt=0.2*10;
     fudge=0.1;
     
     //inside (the inner part)
     insideLen=0.2*190.5;
-    insideCamHgh=9;
+    insideCamHgh=0.2*42.891;
+    insideNudgeAng=76.552; //°
     
     //pusher (the pusher knob)
     pusherLen=0.2*228.6;
     pusherCamHgh=0.2*85.781; echo("pCamh", pusherCamHgh);
     pusherDrillHgh=0.2*38.1;
     pusherNudgeAng=60; //60°
+    pusherNudgeHgh=0.2*152.4;
+    
     
     
     cylinder(h=insideLen,d=innerDia); //shaft
@@ -207,32 +211,54 @@ module pushPenMecha()
         }
         cylinder(h=insideLen-insideCamHgh-1,d=outerDia);//body
         }
-        translate([0,0,(insideLen-fudge)/2]) cube([outerDia+fudge,nudgeWdh,insideLen],true);
+        translate([0,0,(insideLen-fudge)/2]) cube([outerDia+fudge,nudgeWdh,insideLen],true); //nudge
     
     }
     
     //pusher
+    
     color("red") translate([0,0,insideLen+pusherLen+fudge]) rotate([0,180,90])
-        !union(){
+    difference(){
+        union(){
             //cam Part
-            translate([0,0,pusherLen-pusherCamHgh]){
+            union(){
                 difference(){
-                    camerator2(pusherCamHgh,outerDia);
-                    translate([0,0,pusherCamHgh-pusherDrillHgh]) cylinder(h=pusherDrillHgh,d=innerDia+fudge);
+                    union(){
+                        translate([0,0,pusherLen-pusherCamHgh]) camerator2(pusherCamHgh,outerDia); //cams
+                        cylinder(h=pusherLen-pusherCamHgh+fudge,d=outerDia); //the body
+                    }        
+                        translate([0,0,-fudge/2]) cylinder(h=pusherLen,d=innerDia+fudge);//Drill
+                
+                    translate([0,0,pusherLen-pusherNudgeHgh/2]) 
+                        rotate([0,0,pusherNudgeAng]) {
+                            translate([(outerDia-nudgeDpt)/2,0,0])  cube([nudgeDpt+fudge,nudgeWdh,pusherNudgeHgh],true);//Nudge
+                            translate([-(outerDia-nudgeDpt)/2,0,0]) cube([nudgeDpt+fudge,nudgeWdh,pusherNudgeHgh],true);//Nudge
+                        }
                 }
-                cylinder(h=pusherCamHgh-pusherDrillHgh,d=innerDia+fudge); //the Drill
+                cylinder(h=pusherLen-pusherDrillHgh,d=innerDia+fudge); //the core
             }
-            //body
-            cylinder(h=pusherLen-pusherCamHgh,d=outerDia);
+            
+            
         }
-        
+        //translate([0,0,(pusherLen-fudge)/2]) rotate([0,0,pusherNudgeAng]) cube([outerDia+fudge,nudgeWdh,pusherLen],true);
+    }
     //shell
     translate() 
-        %difference() {
+    !union(){
+        difference() {
             cylinder(h=pusherLen+insideLen,d=outerDia+2);
             translate([0,0,-fudge/2]) cylinder(h=pusherLen+insideLen+fudge,d=outerDia+fudge);
         }
-    
+        intersection() {
+            translate([0,0,pusherCamHgh]) rotate([180,0,0]) camerator2(pusherCamHgh,outerDia+fudge*2);
+            union(){
+                rotate([0,0,pusherNudgeAng])
+                    translate([0,(outerDia-nudgeDpt+fudge)/2,pusherNudgeHgh/2])cube([nudgeWdh-fudge,nudgeDpt-fudge,pusherNudgeHgh],true);
+                rotate([0,0,pusherNudgeAng])
+                    translate([0,-(outerDia-nudgeDpt+fudge)/2,pusherNudgeHgh/2])cube([nudgeWdh-fudge,nudgeDpt-fudge,pusherNudgeHgh],true);
+            }
+        }
+    }
 }
 module screw15()
 {
